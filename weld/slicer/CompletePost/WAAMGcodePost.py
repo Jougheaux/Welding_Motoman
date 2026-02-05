@@ -110,17 +110,18 @@ if(js_flag):
     run_baseline_joint(data_dir)
 
 #step 3: run drivers
-def run_drivers(): #this works i just dont know how to show the new shell so we can kill it later
+def run_drivers():
     driver_dir = current_dir+'/../../../run_driver_cmd/'
 
-    subprocess.Popen(["run_flir.bat"], cwd=driver_dir, shell=True)
+    subprocess.Popen(['cmd.exe', '/k', 'run_flir.bat'], cwd=driver_dir, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    subprocess.Popen(['cmd.exe', '/k', 'run_fronius_monitor.bat'], cwd=driver_dir, creationflags=subprocess.CREATE_NEW_CONSOLE)
     return
 
 recorded_dir = make_unique_path(data_dir+'/data/')
 
 #step 4: run welder 
 if(print_flag):
-    
+    run_drivers():
     input("Enter to start welding process")
     weld_sliced(job_offset, feedrate_cmd, vd, measure_distance,pos_vel,jog_vd,height_offset, (ARCON and flir_on), ARCON, recorded_dir, data_dir)
 
