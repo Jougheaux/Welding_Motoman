@@ -1,0 +1,11 @@
+baselayer_length: 43
+baselayer_num: 2
+baselayer_resolution: 2.5
+layer_length: 32
+layer_num: 60
+layer_resolution: 2.5
+path_dl: 3.141592653589793
+q_positioner_seed:
+- -0.261799387799149
+- 1.5708
+smooth_filter: false

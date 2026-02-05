@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    dataset='wall/'
-    sliced_alg='1_5mm_slice/'
+    dataset='slicer_test/'
+    sliced_alg='.1mm_slice/'
     data_dir='../data/'+dataset+sliced_alg
-    num_layers=29
+    num_layers=25
     num_baselayers=0
     num_sections = 1
     curve_sliced_js=[]

@@ -392,6 +392,7 @@ class redundancy_resolution(object):
 			for x in range(len(curve_sliced_relative[i])):
 				
 				positioner_js_ith_layer_xth_section=self.positioner.find_curve_js(-curve_sliced_relative[i][x][:,3:],q_prev)
+				print(str(i)+','+str(x))
 
 				q_prev=positioner_js_ith_layer_xth_section[-1]
 				###filter noise
