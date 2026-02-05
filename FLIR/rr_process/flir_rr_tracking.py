@@ -36,7 +36,8 @@ class FLIR_RR_TRACKING(object):
 
         self.ir_process_struct=RRN.NewStructure("experimental.ir_process.ir_process_struct")
         self.flame_centroid_history = []
-        self.height_offset = -1.5855711171951952
+        self.height_offset = -6.318382754974749
+        # self.height_offset = -7.92870911432761
 
         ######## ROBOTS ########
         # Define Kinematics
@@ -115,11 +116,12 @@ class FLIR_RR_TRACKING(object):
                 traceback.print_exc()
 
             if centroid is not None:
-                print(centroid)
                 # TODO: error is south of this line
                 # check temperature
-                ir_crop = ir_image[bbox[1]:bbox[1]+bbox[3],bbox[0]:bbox[0]+bbox[2]]
-                avg_temp = np.average(ir_crop)
+                # ir_crop = ir_image[bbox[1]:bbox[1]+bbox[3],bbox[0]:bbox[0]+bbox[2]]
+                # print(ir_crop)
+                # avg_temp = np.average(ir_crop)
+                # print("Avg Temp 1: {avg_temp}")
                 # find world frame coordinates of flame
                 vector = np.array(
                     [
@@ -154,7 +156,7 @@ class FLIR_RR_TRACKING(object):
                 # intersection = self.filter.process(intersection)
                 try:
                     self.ir_process_struct.flame_position=intersection
-                    self.ir_process_struct.avg_flame_temp=avg_temp
+                    self.ir_process_struct.avg_flame_temp=0
                     self.ir_process_result.OutValue=self.ir_process_struct
                 except Exception as e:
                     print(e)
