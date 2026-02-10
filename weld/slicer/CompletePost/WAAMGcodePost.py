@@ -37,7 +37,7 @@ file_number_index = 0 #use to set the file extension number if just welding and 
 #all in mm needs to have nice input box in slicer ui eventually
 X_SET = 0
 Y_SET = 0
-Z_SET = 26
+Z_SET = 26 #build plate thickness
 
 
 #WELDING PARAMETERS
@@ -50,7 +50,7 @@ vd = 15
 measure_distance = 500
 pos_vel = 1.0
 jog_vd = 5.0
-height_offset = -7.9287 #mm this accounts for where the camera thinks the bead is
+height_offset = -7.9287 #mm this accounts for where the camera thinks the bead is, DO NOT USE TO CHANGE LAYER POSITION
 
 make_new_slice_dir = True
 
