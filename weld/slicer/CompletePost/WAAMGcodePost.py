@@ -27,9 +27,9 @@ from angled_layers import *
 
 
 #Flags
-slice_flag = False
-js_flag = slice_flag
-print_flag = True
+slice_flag = True
+motion_test_flag = False
+print_flag = False
 
 file_number_index = 0 #use to set the file extension number if just welding and not slicing
 
@@ -42,15 +42,15 @@ Z_SET = 26 #build plate thickness
 
 #WELDING PARAMETERS
 
-ARCON = True
-flir_on = True
-job_offset = 94
+ARCON = print_flag
+flir_on = True #set to false if entirely manual layer height adjustment is desired
+job_offset = 99
 feedrate_cmd = 0
 vd = 15
 measure_distance = 500
 pos_vel = 1.0
 jog_vd = 5.0
-height_offset = -7.9287 #mm this accounts for where the camera thinks the bead is, DO NOT USE TO CHANGE LAYER POSITION
+height_offset = -7.9287 #mm this accounts for where the camera thinks the bead is
 
 make_new_slice_dir = True
 
@@ -105,7 +105,7 @@ if(slice_flag):
 
 
 #step 2: redundacy resolution
-
+js_flag = slice_flag
 if(js_flag):
     run_baseline_joint(data_dir)
 
@@ -120,12 +120,12 @@ def run_drivers():
 recorded_dir = make_unique_path(data_dir+'/data/')
 
 #step 4: run welder 
-if(print_flag):
-    run_drivers():
+if(print_flag or motion_test_flag):
+    if((ARCON)):
+        input("Enter to run drivers (this will create new terminal windows)")
+        run_drivers()
     input("Enter to start welding process")
     weld_sliced(job_offset, feedrate_cmd, vd, measure_distance,pos_vel,jog_vd,height_offset, (ARCON and flir_on), ARCON, recorded_dir, data_dir)
 
-#4.1 is motion test 4.2 is run part
-#create a folder in the same folder with the same name as the gcode to hold flir data
 
 
