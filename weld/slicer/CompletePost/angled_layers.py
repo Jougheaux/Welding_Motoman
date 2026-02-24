@@ -5,6 +5,7 @@ using non-uniform height profiles.
 
 import time
 import pickle
+import h5py
 import numpy as np
 import cv2
 from flir_toolbox import *
@@ -56,6 +57,18 @@ def avg_by_line(labels, data_array, bins):
             output[idx, :] = total / avg_idxs.shape[0]
     return output
 
+def extract_midpoints(curve_sliced):
+    '''
+    Extracts the midpoints of segments in curve_sliced and returns 
+        an array with those points.
+    '''
+    # number of segments is one less than the number of points
+    N = curve_sliced.shape[0]-1
+    midpoints = np.zeros((N,3))
+    for i in range(N):
+        midpoints[i,:] = np.mean(curve_sliced[[i,i+1],:3], axis=0)
+
+    return midpoints
 
 class SpeedHeightModel:
     """
@@ -153,11 +166,15 @@ def flame_detection_aluminum(
 
 
 def flame_tracking_stream(save_path, robot, robot2, positioner, flir_intrinsic, height_offset=0):
-    with open(save_path + "ir_recording.pickle", "rb") as file:
-        ir_recording = pickle.load(file)
-    ir_ts = np.loadtxt(save_path + "ir_stamps.csv", delimiter=",")
-    if ir_ts.shape[0] == 0:
-        raise ValueError("No flame detected")
+    # with open(save_path + "ir_recording.pickle", "rb") as file:
+    #     ir_recording = pickle.load(file)
+    # ir_ts = np.loadtxt(save_path + "ir_stamps.csv", delimiter=",")
+    # if ir_ts.shape[0] == 0:
+    #     raise ValueError("No flame detected")
+    with h5py.File(save_path+"ir_recording.h5", 'r') as file:
+        ir_recording = file["video_frames"][:]
+        ir_ts = file["timestamps"][:]
+
     joint_angle = np.loadtxt(save_path + "weld_js_exe.csv", delimiter=",")
     timeslot = [ir_ts[0] - ir_ts[0], ir_ts[-1] - ir_ts[0]]
     duration = np.mean(np.diff(timeslot))
@@ -221,11 +238,14 @@ def flame_tracking_stream(save_path, robot, robot2, positioner, flir_intrinsic, 
     return flame_3d, torch_path, job_no
 
 def flame_tracking(save_path, robot, robot2, positioner, flir_intrinsic, height_offset=0):
-    with open(save_path + "ir_recording.pickle", "rb") as file:
-        ir_recording = pickle.load(file)
-    ir_ts = np.loadtxt(save_path + "ir_stamps.csv", delimiter=",")
-    if ir_ts.shape[0] == 0:
-        raise ValueError("No flame detected")
+    # with open(save_path + "ir_recording.pickle", "rb") as file:
+    #     ir_recording = pickle.load(file)
+    # ir_ts = np.loadtxt(save_path + "ir_stamps.csv", delimiter=",")
+    # if ir_ts.shape[0] == 0:
+    #     raise ValueError("No flame detected")
+    with h5py.File(save_path+"ir_recording.h5", 'r') as file:
+        ir_recording = file["video_frames"][:]
+        ir_ts = file["timestamps"][:]
     joint_angle = np.loadtxt(save_path + "weld_js_exe.csv", delimiter=",")
     timeslot = [ir_ts[0] - ir_ts[0], ir_ts[-1] - ir_ts[0]]
     duration = np.mean(np.diff(timeslot))
@@ -290,11 +310,14 @@ def flame_tracking(save_path, robot, robot2, positioner, flir_intrinsic, height_
 
 
 def flame_temp(save_path):
-    with open(save_path + "ir_recording.pickle", "rb") as file:
-        ir_recording = pickle.load(file)
-    ir_ts = np.loadtxt(save_path + "ir_stamps.csv", delimiter=",")
-    if ir_ts.shape[0] == 0:
-        raise ValueError("No flame detected")
+    # with open(save_path + "ir_recording.pickle", "rb") as file:
+    #     ir_recording = pickle.load(file)
+    # ir_ts = np.loadtxt(save_path + "ir_stamps.csv", delimiter=",")
+    # if ir_ts.shape[0] == 0:
+    #     raise ValueError("No flame detected")
+    with h5py.File(save_path+"ir_recording.h5", 'r') as file:
+        ir_recording = file["video_frames"][:]
+        ir_ts = file["timestamps"][:]
     joint_angle = np.loadtxt(save_path + "weld_js_exe.csv", delimiter=",")
     timeslot = [ir_ts[0] - ir_ts[0], ir_ts[-1] - ir_ts[0]]
     duration = np.mean(np.diff(timeslot))
@@ -462,6 +485,7 @@ class LiveAverageFilterPos():
         self.cum_sum = np.zeros((3,1))
         # initialize sample count to zero
         self.samp_count = 0
+        self.prev_out = np.zeros((3,1))
     def log_reading(self, x):
         self.cum_sum[0]+= x[0]
         self.cum_sum[1]+= x[1]
@@ -470,10 +494,11 @@ class LiveAverageFilterPos():
     def read_filter(self):
         if self.samp_count != 0:
             output = self.cum_sum/self.samp_count
+            self.prev_out = output
             self.cum_sum = np.zeros((3,1))
             self.samp_count = 0
         else:
-            output = np.zeros((3,1))
+            output = self.prev_out
         return output
 
 class LiveAverageFilterScalar():
